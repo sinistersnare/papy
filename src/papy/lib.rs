@@ -3,7 +3,7 @@
 extern crate regex;
 #[phase(plugin)] extern crate regex_macros;
 
-pub use interpreter::{LangString, LangName, LangNumber,Other,
-           run_program, SymbolTable, tokenize_str};
-
+pub use program::{PapyProgram};
+mod program;
 mod interpreter;
+
