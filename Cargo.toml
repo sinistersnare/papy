@@ -1,0 +1,23 @@
+[package]
+
+name = "papy"
+version = "0.0.1"
+authors = ["Davis Silverman <sinistersnare@gmail.com>"]
+
+[lib]
+name = "papy"
+path = "src/papy/lib.rs"
+test=true
+
+[[bin]]
+name = "papy"
+path = "src/bin/papy.rs"
+
+
+[dependencies.scan]
+
+git = "https://github.com/DanielKeep/rust-scan.git"
+
+[dependencies.scan_util]
+
+git = "https://github.com/DanielKeep/rust-scan-util.git"
