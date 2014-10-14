@@ -1,30 +1,40 @@
 use interpreter::{SymbolTable, tokenize_str, Token, run_stack, Definition, Item, Comment};
 
-pub struct PapyProgram<'a> {
-    table: SymbolTable<'a>,
-    stack: Vec<Token<'a>>,
+#[deriving(Show)]
+pub struct PapyState<'a> {
+    pub tokens: Vec<Token<'a>>,
+    pub symbols: SymbolTable<'a>,
 }
 
-impl<'a> PapyProgram<'a> {
-    pub fn new() -> PapyProgram<'a>{
-        PapyProgram {
-            table: SymbolTable::new(),
-            stack: vec![],
+impl<'a> PapyState<'a> {
+    pub fn new() -> PapyState<'a> {
+        PapyState {
+            tokens: vec![],
+            symbols: SymbolTable::new(),
         }
     }
-
-    /// adds the instruction to the stack, and executes the whole program.
-    pub fn add_instruction(&'a mut self, line: &'a str) {
-        let token = tokenize_str(line);
-        match token {
-            Definition(..) => {
-                self.table.add_symbol(&token)
-            }
-            Item(_) => {
-                self.stack.push(token)
-            }
-            Comment(_) => { }
+}
+impl<'a> Clone for PapyState<'a> {
+    fn clone(&self) -> PapyState<'a> {
+        PapyState {
+            tokens: self.tokens.clone(),
+            symbols: self.symbols.clone(),
         }
-        self.stack = run_stack(self.stack.clone(), &self.table);
+    }
+}
+
+pub fn add_item<'a>(line: &'a str, mut state: PapyState<'a>) -> PapyState<'a> {
+    let token = tokenize_str(line);
+    state.tokens.push(token.clone());
+    match token {
+        Definition(..) => {
+            state.symbols.add_symbol(&token);
+            state
+        },
+        Item(_) => {
+            state.tokens = run_stack(state.tokens.clone(), &state.symbols.clone());
+            state
+        },
+        Comment(_) => state,
     }
 }

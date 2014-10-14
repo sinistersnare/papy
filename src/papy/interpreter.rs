@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::hash::{Hash, Writer};
 use std::fmt;
 
-#[deriving(Show, PartialEq, Eq, Clone)]
+#[deriving(Show, PartialEq, Clone)]
 pub enum Token<'a> {
     Definition {
         name: &'a str,
@@ -13,17 +13,34 @@ pub enum Token<'a> {
     Comment(&'a str),
 }
 
-#[deriving(PartialEq, Eq, Show, Clone)]
+#[deriving(PartialEq, Show, Clone)]
 pub enum LangItem<'a> {
     PapyNumber(i32),
     PapyString(&'a str),
     PapyName(&'a str),
 }
 
+#[deriving(Show, PartialEq, Clone)]
+struct Argument<'a> {
+    name: &'a str,
+    value: LangItem<'a>,
+}
+
 struct Symbol<'a> {
     name: &'a str,
     arity: u32,
-    function: fn(args: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Token<'a>,
+    function: fn(name: &'a str, args: &Vec<Argument<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
+}
+
+
+impl<'a> Clone for Symbol<'a> {
+    fn clone(&self) -> Symbol<'a> {
+        Symbol {
+            name: self.name.clone(),
+            arity: self.arity.clone(),
+            function: self.function,
+        }
+    }
 }
 
 impl<'a> PartialEq for Symbol<'a> {
@@ -47,8 +64,22 @@ impl<'a> fmt::Show for Symbol<'a> {
     }
 }
 
+impl<'a> fmt::Show for SymbolTable<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "SymbolTable {{symbols: {}}}", self.symbols)
+    }
+}
+
 pub struct SymbolTable<'a> {
         symbols: HashSet<Symbol<'a>>,
+}
+
+impl<'a> Clone for SymbolTable<'a> {
+    fn clone(&self) -> SymbolTable<'a> {
+        SymbolTable {
+            symbols: self.symbols.clone()
+        }
+    }
 }
 
 impl<'a> SymbolTable<'a> {
@@ -59,10 +90,12 @@ impl<'a> SymbolTable<'a> {
             name: "+",
             arity: 2,
             function: { //need moar unboxed closures
-                fn func<'a>(args: &Vec<Token<'a>>, _symbols: &SymbolTable) -> Token<'a> {
+                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
                     match (args[0], args[1]) {
-                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => Item(PapyNumber(x + y)),
-                        (Item(PapyString(_)), Item(PapyString(_))) => fail!("cant add strings! They also dont exist yet!"),
+                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
+                            vec![Item(PapyNumber(x + y))]
+                        },
+                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
                         (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
                     }
                 };
@@ -88,28 +121,37 @@ impl<'a> SymbolTable<'a> {
                 _ => fail!("token \"{}\" is not a definition!", token),
             },
             function: { //NEED MOAR UNBOXED CLOSURES to get rid of the symbols arg.
-                fn func<'a>(args: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Token<'a> {
+                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     let mut local_stack: Vec<Token<'a>> = vec![];
-                    for item in args.iter() {
-                        match *item {
-                            Item(PapyNumber(num)) => local_stack.push(Item(PapyNumber(num))),
-                            Item(PapyString(string)) => local_stack.push(Item(PapyString(string))),
-                            Item(PapyName(name)) => {
+                    for arg in args.iter() {
+                        match *arg {
+                            Argument {name, value: PapyNumber(num)} => local_stack.push(Item(PapyNumber(num))),
+                            Argument {name, value: PapyString(string)}=> local_stack.push(Item(PapyString(string))) ,
+                            Argument {name: arg_name, value: PapyName(name)} => {
                                 let sym = symbols.get(name);
-                                let mut args = vec![];
+                                let mut local_args = vec![];
                                 for i in range(0, sym.arity) {
-                                    args.push(local_stack.pop().unwrap()); //FIXME unwrap
+                                    local_args.push(match local_stack.pop() {
+                                        Some(Item(val)) => {
+                                            Argument {
+                                                name: arg_name,
+                                                value: val
+                                            }
+                                        },
+                                        Some(_) => fail!("HOW DID WE GET HERE"),
+                                        None => fail!("couldnt pop from local stack! not enough args")
+
+                                    }); //FIXME unwrap
                                 }
-                                (sym.function)(&args, symbols);
+                                (sym.function)(sym.name, &local_args, symbols);
                             },
-                            _ => fail!("not an item! WATCHU DOIN WITH {}", item)
                         }
                     }
-                    assert!(local_stack.len() == 1); // needs to be one size? correct?
-                    local_stack.pop().unwrap()
+                    local_stack
                 };
                 func
-            }
+            },
+
         });
 
 
@@ -124,44 +166,40 @@ impl<'a> SymbolTable<'a> {
         }
     }
 }
+
 pub fn tokenize_str<'a>(text: &'a str) -> Token<'a> {
-    let mut result = vec![];
-    for cap in regex!(
-                r##"(?:(?P<definition>^def .*:.*end)|(?P<comment>#.*)|(?P<item>\s?^[\w\+-\*\?!]*)|(?P<other>\W+))\s*"##
-            ).captures_iter(text) {
-        let token =
-            if cap.pos(1).is_some() { //iterators instead?
-                let whole_def = cap.name("definition").trim();
-                let parts: Vec<&'a str> = whole_def.split_str(":").collect();
-                let name = parts[0].split_str(" ").collect::<Vec<&'a str>>()[1]; // def NAME what ever
-                let arity = parts[0].split_str(" ").collect::<Vec<&'a str>>()[2..].len() as u32;
-                println!("args: {}, arity: {}", parts[0].split_str(" ").collect::<Vec<&'a str>>()[2..], arity)
-                let body = parts[1];
-                Definition {
-                    name: name,
-                    arity: arity,
-                    body: body,
-                }
-            }
-            else if cap.pos(2).is_some() {
-                Comment(cap.name("comment").trim())
-            }
-            else if cap.pos(3).is_some() {
-                let item = cap.name("item");
-                match from_str(item) { //TODO string support
-                    Some(val) => Item(PapyNumber(val)),
-                    None => Item(PapyName(item)),
-                }
-            }
-            else  {
-                fail!("unknown token in \"{}\". try again!", text)
-            };
+    let cap = regex!(r##"(?:(?P<definition>^def .*:.*end)|(?P<comment>#.*)|(?P<item>\s?^[\w\+-\*\?!]*)|(?P<other>\W+))\s*"##)
+        .captures(text).unwrap();
 
+    if cap.pos(1).is_some() { //iterators instead?
+        let whole_def = cap.name("definition").trim();
+        println!("whole_def: {}", whole_def)
+        let parts: Vec<&'a str> = whole_def.split_str(":").collect();
+        let left = parts[0].split_str(" ").collect::<Vec<&'a str>>();
+        let name = left[1];
+        let arity = left[2..].len() as u32;
+        let body = parts[1].split_str("end").collect::<Vec<&'a str>>()[0];
+        println!("body of {}: {}", name, body);
+        Definition {
+            name: name,
+            arity: arity,
+            body: body,
+        }
     }
-    result.pop().unwrap() //FIXME this function should return one Token, and dont need the pop.unwrap
+    else if cap.pos(2).is_some() {
+        Comment(cap.name("comment").trim())
+    }
+    else if cap.pos(3).is_some() {
+        let item = cap.name("item");
+        match from_str(item) { //TODO string support
+            Some(val) => {Item(PapyNumber(val)) },
+            None => { Item(PapyName(item)) },
+        }
+    }
+    else  {
+        fail!("unknown token in \"{}\". try again!", text)
+    }
 }
-
-
 
 pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> Vec<Token<'a>>{
     let mut stack: Vec<Token<'a>> = vec![];
@@ -178,12 +216,18 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                     let symbol = symbol_table.get(name);
                     for i in range(0, symbol.arity) {
                         args.push(match stack.pop() {
-                            Some(x) => { x },
+                            Some(Item(x)) => {
+                                Argument {
+                                    name: "",
+                                    value: x,
+                                }
+                            },
+                            Some(_) => fail!("HOW DID WE GET HERE!"),
                             None => fail!("failure to pop from stack!"),
                         });
                     }
-                    let result = (symbol.function)(&args, symbol_table);
-                    stack.push(result);
+                    let result = (symbol.function)(name, &args, symbol_table);
+                    stack.extend(result.into_iter());
                 }
             }
         }
