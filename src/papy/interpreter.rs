@@ -233,8 +233,9 @@ impl<'a> SymbolTable<'a> {
     }
 }
 
+/// Takes in an &str and returns a token representation of it
 pub fn tokenize_str<'a>(text: &'a str) -> Token<'a> {
-    let cap = regex!(r##"(?:(?P<definition>^def .*:.*end)|(?P<comment>#.*)|(?P<item>\s?^[\w\+-\*\?!]*)|(?P<other>\W+))\s*"##)
+    let cap = regex!(r##"(?:(?P<definition>^def .*:.*end)|(?P<comment>#.*)|(?P<item>\s?^[\w\+-\*\?!]*))\s*"##)
         .captures(text).unwrap();
 
     if cap.pos(1).is_some() { //iterators instead?
