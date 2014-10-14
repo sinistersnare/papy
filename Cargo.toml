@@ -1,7 +1,7 @@
 [package]
 
 name = "papy"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["Davis Silverman <sinistersnare@gmail.com>"]
 
 [lib]

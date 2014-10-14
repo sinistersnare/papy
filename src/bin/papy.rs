@@ -21,10 +21,14 @@ fn main() {
         "4",
         "5",
         "+",
-        "+",
+        "*",
+        "3",
+        "switch",
+        "/"
     ];
+
     let final_state = lines.into_iter()
-        .fold(PapyState::new(), |old_state, line| add_item(line, old_state.clone()));
+        .fold(PapyState::new(), |old_state, line| add_item(old_state, line));
 
     println!("final stack: {}", final_state.tokens);
 }

@@ -14,6 +14,7 @@ impl<'a> PapyState<'a> {
         }
     }
 }
+
 impl<'a> Clone for PapyState<'a> {
     fn clone(&self) -> PapyState<'a> {
         PapyState {
@@ -23,16 +24,17 @@ impl<'a> Clone for PapyState<'a> {
     }
 }
 
-pub fn add_item<'a>(line: &'a str, mut state: PapyState<'a>) -> PapyState<'a> {
+pub fn add_item<'a>(mut state: PapyState<'a>, line: &'a str) -> PapyState<'a> {
     let token = tokenize_str(line);
-    state.tokens.push(token.clone());
+
     match token {
         Definition(..) => {
             state.symbols.add_symbol(&token);
             state
         },
         Item(_) => {
-            state.tokens = run_stack(state.tokens.clone(), &state.symbols.clone());
+            state.tokens.push(token.clone());
+            state.tokens = run_stack(state.tokens, &state.symbols);
             state
         },
         Comment(_) => state,

@@ -32,6 +32,11 @@ struct Symbol<'a> {
     function: fn(name: &'a str, args: &Vec<Argument<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
 }
 
+pub struct SymbolTable<'a> {
+    symbols: HashSet<Symbol<'a>>,
+}
+
+impl<'a> Eq for Symbol<'a> {}
 
 impl<'a> Clone for Symbol<'a> {
     fn clone(&self) -> Symbol<'a> {
@@ -56,8 +61,6 @@ impl<'a, H: Writer> Hash<H> for Symbol<'a> {
  }
 }
 
-impl<'a> Eq for Symbol<'a> {}
-
 impl<'a> fmt::Show for Symbol<'a> {
     fn fmt(&self,f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Symbol {{name: {} }}", self.name)
@@ -68,10 +71,6 @@ impl<'a> fmt::Show for SymbolTable<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "SymbolTable {{symbols: {}}}", self.symbols)
     }
-}
-
-pub struct SymbolTable<'a> {
-        symbols: HashSet<Symbol<'a>>,
 }
 
 impl<'a> Clone for SymbolTable<'a> {
@@ -102,6 +101,73 @@ impl<'a> SymbolTable<'a> {
                 func
             },
         });
+        symbols.insert(Symbol {
+            name: "*",
+            arity: 2,
+            function: {
+                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
+                    match (args[0], args[1]) {
+                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
+                            vec![Item(PapyNumber(x * y))]
+                        },
+                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
+                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                    }
+                };
+                func
+            },
+        });
+        symbols.insert(Symbol {
+            name: "/",
+            arity: 2,
+            function: {
+                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
+                    match (args[0], args[1]) {
+                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
+                            vec![Item(PapyNumber(x / y))]
+                        },
+                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
+                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                    }
+                };
+                func
+            },
+        });
+        symbols.insert(Symbol {
+            name: "-",
+            arity: 2,
+            function: {
+                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
+                    match (args[0], args[1]) {
+                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
+                            vec![Item(PapyNumber(x - y))]
+                        },
+                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
+                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                    }
+                };
+                func
+            },
+        });
+        symbols.insert(Symbol {
+            name: "switch",
+            arity: 2,
+            function: {
+                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
+                    match (args[0], args[1]) {
+                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
+                            vec![Item(PapyNumber(x)), Item(PapyNumber(y))]
+                        },
+                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
+                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                    }
+                };
+                func
+            },
+        });
+
+
+
         SymbolTable {
             symbols: symbols,
         }
