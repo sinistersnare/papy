@@ -6,8 +6,8 @@ use std::fmt;
 pub enum Token<'a> {
     Definition {
         name: &'a str,
-        arity: u32,
-        body: &'a str,
+        arity: uint,
+        body: Vec<&'a str>,
     },
     Item(LangItem<'a>),
     Comment(&'a str),
@@ -28,7 +28,7 @@ struct Argument<'a> {
 
 struct Symbol<'a> {
     name: &'a str,
-    arity: u32,
+    arity: uint,
     function: fn(name: &'a str, args: &Vec<Argument<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
 }
 
@@ -244,13 +244,13 @@ pub fn tokenize_str<'a>(text: &'a str) -> Token<'a> {
         let parts: Vec<&'a str> = whole_def.split_str(":").collect();
         let left = parts[0].split_str(" ").collect::<Vec<&'a str>>();
         let name = left[1];
-        let arity = left[2..].len() as u32;
+        let arity = left[2..].len();
         let body = parts[1].split_str("end").collect::<Vec<&'a str>>()[0];
         println!("body of {}: {}", name, body);
         Definition {
             name: name,
             arity: arity,
-            body: body,
+            body: vec![body],
         }
     }
     else if cap.pos(2).is_some() {
@@ -267,6 +267,32 @@ pub fn tokenize_str<'a>(text: &'a str) -> Token<'a> {
         fail!("unknown token in \"{}\". try again!", text)
     }
 }
+
+/// Takes in an &str and returns a token representation of it
+pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
+
+    match scan! {
+        text,
+
+        "#" comment:&str => Comment(comment),
+        #[tokenizer="IdentsAndInts"]
+        "def" name:&str arity:uint ":" [(?!"end") body_tokens:&str]* "end" => {
+            Definition {
+                name: name,
+                arity: arity,
+                body: body_tokens,
+            }
+        },
+        num:i32 => Item(PapyNumber(num)),
+        "`" string:&str "`" => Item(PapyString(string)),
+        name:&str => Item(PapyName(name))
+
+    } {
+        Ok(tok) => tok,
+        Err(reason) => fail!("could not parse input string: {}", reason)
+    }
+}
+
 
 pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> Vec<Token<'a>>{
     let mut stack: Vec<Token<'a>> = vec![];

@@ -16,7 +16,7 @@ fn main() {
         //}
 
     let lines = vec![
-        "# def add x y: x y + end",
+        "# def add x y begin x y + end",
         "3",
         "4",
         "5",
@@ -24,7 +24,7 @@ fn main() {
         "*",
         "3",
         "switch",
-        "/"
+        "/",
     ];
 
     let final_state = lines.into_iter()

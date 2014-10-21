@@ -12,3 +12,11 @@ test=true
 [[bin]]
 name = "papy"
 path = "src/bin/papy.rs"
+
+[dependencies.scan]
+
+git = "https://github.com/DanielKeep/rust-scan.git"
+
+[dependencies.scan_util]
+
+git = "https://github.com/DanielKeep/rust-scan-util.git"

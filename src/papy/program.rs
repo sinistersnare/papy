@@ -1,4 +1,4 @@
-use interpreter::{SymbolTable, tokenize_str, Token, run_stack, Definition, Item, Comment};
+use interpreter::{SymbolTable, scan_str, Token, run_stack, Definition, Item, Comment};
 
 #[deriving(Show)]
 pub struct PapyState<'a> {
@@ -25,7 +25,7 @@ impl<'a> Clone for PapyState<'a> {
 }
 
 pub fn add_item<'a>(mut state: PapyState<'a>, line: &'a str) -> PapyState<'a> {
-    let token = tokenize_str(line);
+    let token = scan_str(line);
 
     match token {
         Definition(..) => {

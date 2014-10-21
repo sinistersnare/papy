@@ -1,4 +1,21 @@
 [root]
 name = "papy"
 version = "0.1.0"
+dependencies = [
+ "scan 0.0.3 (git+https://github.com/DanielKeep/rust-scan.git#36c328c646a5add55c4d3e2af446fcc67c0eb080)",
+ "scan_util 0.0.3 (git+https://github.com/DanielKeep/rust-scan-util.git#68228a9cda50b6211ee16053d9aefb99036990b4)",
+]
+
+[[package]]
+name = "scan"
+version = "0.0.3"
+source = "git+https://github.com/DanielKeep/rust-scan.git#36c328c646a5add55c4d3e2af446fcc67c0eb080"
+dependencies = [
+ "scan_util 0.0.3 (git+https://github.com/DanielKeep/rust-scan-util.git#68228a9cda50b6211ee16053d9aefb99036990b4)",
+]
+
+[[package]]
+name = "scan_util"
+version = "0.0.3"
+source = "git+https://github.com/DanielKeep/rust-scan-util.git#68228a9cda50b6211ee16053d9aefb99036990b4"
 

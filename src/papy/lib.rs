@@ -1,7 +1,9 @@
-#![feature(phase, if_let, default_type_params, struct_variant)]
+#![feature(phase, if_let, default_type_params, struct_variant, slicing_syntax)]
 
-extern crate regex;
 #[phase(plugin)] extern crate regex_macros;
+extern crate regex;
+#[phase(plugin)] extern crate scan;
+extern crate scan_util;
 
 pub use program::{add_item, PapyState};
 
