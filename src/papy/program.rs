@@ -37,6 +37,6 @@ pub fn add_item<'a>(mut state: PapyState<'a>, line: &'a str) -> PapyState<'a> {
             state.tokens = run_stack(state.tokens, &state.symbols);
             state
         },
-        Comment(_) => state,
+        Comment => state,
     }
 }

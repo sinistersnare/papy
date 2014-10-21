@@ -16,7 +16,8 @@ fn main() {
         //}
 
     let lines = vec![
-        "# def add x y begin x y + end",
+        "# this should be a comment",
+        "def add 2: %0 %1 + end",
         "3",
         "4",
         "5",

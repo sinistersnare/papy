@@ -10,7 +10,8 @@ pub enum Token<'a> {
         body: Vec<&'a str>,
     },
     Item(LangItem<'a>),
-    Comment(&'a str),
+    Comment,
+    // Comment(&'a str),
 }
 
 #[deriving(PartialEq, Show, Clone)]
@@ -166,8 +167,6 @@ impl<'a> SymbolTable<'a> {
             },
         });
 
-
-
         SymbolTable {
             symbols: symbols,
         }
@@ -207,7 +206,7 @@ impl<'a> SymbolTable<'a> {
                                         Some(_) => fail!("HOW DID WE GET HERE"),
                                         None => fail!("couldnt pop from local stack! not enough args")
 
-                                    }); //FIXME unwrap
+                                    });
                                 }
                                 (sym.function)(sym.name, &local_args, symbols);
                             },
@@ -219,8 +218,6 @@ impl<'a> SymbolTable<'a> {
             },
 
         });
-
-
     }
     fn contains_name(&self, name: &'a str ) -> bool {
         self.symbols.iter().any(|symbol| symbol.name == name)
@@ -235,13 +232,17 @@ impl<'a> SymbolTable<'a> {
 
 /// Takes in an &str and returns a token representation of it
 pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
-
     match scan! {
         text,
 
-        "#" comment:&str => Comment(comment),
+        "#", .._tail => {
+            //TODO do we need to have a Comment(&str)?
+            println!("scanned a comment!")
+            Comment
+        },
         #[tokenizer="IdentsAndInts"]
         "def" name:&str arity:uint ":" [(?!"end") body_tokens:&str]* "end" => {
+            println!("scanned a definition!")
             Definition {
                 name: name,
                 arity: arity,
@@ -249,8 +250,15 @@ pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
             }
         },
         num:i32 => Item(PapyNumber(num)),
-        "`" string:&str "`" => Item(PapyString(string)),
-        name:&str => Item(PapyName(name))
+        "`" string:&str "`" => {
+            println!("scanned a string!")
+            Item(PapyString(string))
+        },
+
+        name:&str => {
+            println!("scanned a name!")
+            Item(PapyName(name))
+        },
 
     } {
         Ok(tok) => tok,
