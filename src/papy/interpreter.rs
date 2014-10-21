@@ -234,41 +234,6 @@ impl<'a> SymbolTable<'a> {
 }
 
 /// Takes in an &str and returns a token representation of it
-pub fn tokenize_str<'a>(text: &'a str) -> Token<'a> {
-    let cap = regex!(r##"(?:(?P<definition>^def .*:.*end)|(?P<comment>#.*)|(?P<item>\s?^[\w\+-\*\?!]*))\s*"##)
-        .captures(text).unwrap();
-
-    if cap.pos(1).is_some() { //iterators instead?
-        let whole_def = cap.name("definition").trim();
-        println!("whole_def: {}", whole_def)
-        let parts: Vec<&'a str> = whole_def.split_str(":").collect();
-        let left = parts[0].split_str(" ").collect::<Vec<&'a str>>();
-        let name = left[1];
-        let arity = left[2..].len();
-        let body = parts[1].split_str("end").collect::<Vec<&'a str>>()[0];
-        println!("body of {}: {}", name, body);
-        Definition {
-            name: name,
-            arity: arity,
-            body: vec![body],
-        }
-    }
-    else if cap.pos(2).is_some() {
-        Comment(cap.name("comment").trim())
-    }
-    else if cap.pos(3).is_some() {
-        let item = cap.name("item");
-        match from_str(item) { //TODO string support
-            Some(val) => {Item(PapyNumber(val)) },
-            None => { Item(PapyName(item)) },
-        }
-    }
-    else  {
-        fail!("unknown token in \"{}\". try again!", text)
-    }
-}
-
-/// Takes in an &str and returns a token representation of it
 pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
 
     match scan! {
