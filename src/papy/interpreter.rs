@@ -190,12 +190,12 @@ impl<'a> SymbolTable<'a> {
                     let mut local_stack: Vec<Token<'a>> = vec![];
                     for arg in args.iter() {
                         match *arg {
-                            Argument {name, value: PapyNumber(num)} => local_stack.push(Item(PapyNumber(num))),
-                            Argument {name, value: PapyString(string)}=> local_stack.push(Item(PapyString(string))) ,
+                            Argument {name: _, value: PapyNumber(num)} => local_stack.push(Item(PapyNumber(num))),
+                            Argument {name: _, value: PapyString(string)}=> local_stack.push(Item(PapyString(string))) ,
                             Argument {name: arg_name, value: PapyName(name)} => {
                                 let sym = symbols.get(name);
                                 let mut local_args = vec![];
-                                for i in range(0, sym.arity) {
+                                for _i in range(0, sym.arity) {
                                     local_args.push(match local_stack.pop() {
                                         Some(Item(val)) => {
                                             Argument {
@@ -230,7 +230,7 @@ impl<'a> SymbolTable<'a> {
     }
 }
 
-/// Takes in an &str and returns a token representation of it
+/// Takes in an Str and returns a token representation of it
 pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
     match scan! {
         text,
@@ -280,7 +280,7 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                     }
                     let mut args = vec![];
                     let symbol = symbol_table.get(name);
-                    for i in range(0, symbol.arity) {
+                    for _i in range(0, symbol.arity) {
                         args.push(match stack.pop() {
                             Some(Item(x)) => {
                                 Argument {
@@ -299,4 +299,20 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
         }
     }
     stack
+}
+
+#[test]
+fn test_tokenizer() {
+
+    println!("def: {}", scan_str("def thing 2: %0 %1 + end"));
+    assert!(scan_str("def thing 2: %0 %1 + end") == Definition {
+        name: "thing",
+        arity: 2,
+        body: vec!["%0", "%1", "+"],
+    })
+    assert!(scan_str("# def thing 2: %0 %1 + end") == Comment)
+    assert!(scan_str("1") == Item(PapyNumber(1)))
+    assert!(scan_str("name") == Item(PapyName("name")))
+    assert!(scan_str("name!") == Item(PapyName("name!")))
+
 }
