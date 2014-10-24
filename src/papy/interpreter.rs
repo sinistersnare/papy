@@ -240,7 +240,8 @@ pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
             println!("scanned a comment!")
             Comment
         },
-        #[tokenizer="IdentsAndInts"]
+
+        #[tokenizer="SpaceDelimited"]
         "def" name:&str arity:uint ":" [(?!"end") body_tokens:&str]* "end" => {
             println!("scanned a definition!")
             Definition {
@@ -313,6 +314,4 @@ fn test_tokenizer() {
     assert!(scan_str("# def thing 2: %0 %1 + end") == Comment)
     assert!(scan_str("1") == Item(PapyNumber(1)))
     assert!(scan_str("name") == Item(PapyName("name")))
-    assert!(scan_str("name!") == Item(PapyName("name!")))
-
 }

@@ -28,7 +28,7 @@ def double 1: %0 %0 + end
 
 the arity is a u32, and the %NUMBER is 0-based indices of local-stack coordinates.
 
-note that user-defined-functions dont actually work right now... But they get parsed almost-correctly!
+note that user-defined-functions dont actually work right now...!
 
 ## running ##
 
