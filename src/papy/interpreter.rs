@@ -21,8 +21,7 @@ pub enum LangItem<'a> {
     PapyName(&'a str),
 }
 
-#[deriving(Show, PartialEq, Clone)]
-struct Argument<'a> {
+pub struct Argument<'a> {
     name: &'a str,
     value: LangItem<'a>,
 }
@@ -237,27 +236,23 @@ pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
 
         "#", .._tail => {
             //TODO do we need to have a Comment(&str)?
-            println!("scanned a comment!")
             Comment
         },
 
         #[tokenizer="SpaceDelimited"]
-        "def" name:&str arity:uint ":" [(?!"end") body_tokens:&str]* "end" => {
-            println!("scanned a definition!")
+        "def" name arity ":" [(?!"end") body_tokens]* "end" => {
             Definition {
                 name: name,
                 arity: arity,
                 body: body_tokens,
             }
         },
-        num:i32 => Item(PapyNumber(num)),
+        num => Item(PapyNumber(num)),
         "`" string:&str "`" => {
-            println!("scanned a string!")
             Item(PapyString(string))
         },
 
-        name:&str => {
-            println!("scanned a name!")
+        name => {
             Item(PapyName(name))
         },
 
@@ -276,14 +271,15 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                 PapyNumber(num) => {stack.push(Item(PapyNumber(num)))},
                 PapyString(string) => {stack.push(Item(PapyString(string)))},
                 PapyName(name) => {
-                    if !symbol_table.contains_name(name) { // making this line was a lot of work D:
+                    if !symbol_table.contains_name(name) {
                         fail!("undefined symbol: \"{}\". aborting!", name)
                     }
                     let mut args = vec![];
                     let symbol = symbol_table.get(name);
-                    for _i in range(0, symbol.arity) {
+                    for _ in range(0, symbol.arity) {
                         args.push(match stack.pop() {
                             Some(Item(x)) => {
+                                println!("X IS {}", x)
                                 Argument {
                                     name: "",
                                     value: x,
@@ -314,4 +310,5 @@ fn test_tokenizer() {
     assert!(scan_str("# def thing 2: %0 %1 + end") == Comment)
     assert!(scan_str("1") == Item(PapyNumber(1)))
     assert!(scan_str("name") == Item(PapyName("name")))
+
 }

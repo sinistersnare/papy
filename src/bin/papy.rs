@@ -16,17 +16,19 @@ fn main() {
         //}
 
     let lines = vec![
-        "# this should be a comment",
+        "# this should be a comment... and it is!",
         "def add 2: %0 %1 + end",
         "3",
         "4",
         "5",
-        "+",
+        "add",
         "*",
         "3",
         "switch",
         "/",
     ];
+
+
 
     let final_state = lines.into_iter()
         .fold(PapyState::new(), |old_state, line| add_item(old_state, line));
