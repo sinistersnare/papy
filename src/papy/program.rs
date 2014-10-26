@@ -26,7 +26,7 @@ impl<'a> Clone for PapyState<'a> {
 
 pub fn add_item<'a>(mut state: PapyState<'a>, line: &'a str) -> PapyState<'a> {
     let token = scan_str(line);
-
+    println!("{}", token);
     match token {
         Definition(..) => {
             state.symbols.add_symbol(&token);

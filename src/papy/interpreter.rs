@@ -9,13 +9,13 @@ pub enum Token<'a> {
         arity: uint,
         body: Vec<&'a str>,
     },
-    Item(LangItem<'a>),
+    Item(PapyItem<'a>),
     Comment,
     // Comment(&'a str),
 }
 
 #[deriving(PartialEq, Show, Clone)]
-pub enum LangItem<'a> {
+pub enum PapyItem<'a> {
     PapyNumber(i32),
     PapyString(&'a str),
     PapyName(&'a str),
@@ -84,10 +84,13 @@ impl<'a> SymbolTable<'a> {
             name: "+",
             arity: 2,
             function: { //need moar unboxed closures
-                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    match (body[0], body[1]) {
-                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x + y))],
-                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
+                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let mut it = body.iter();
+                    let first = it.next().unwrap();
+                    let second= it.next().unwrap();
+                    match (first, second) {
+                        (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x + y))],
+                        _ => fail!("+ can not be applied to {} and {}", first, second),
                     }
                 };
 
@@ -98,23 +101,29 @@ impl<'a> SymbolTable<'a> {
             name: "*",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    match (body[0], body[1]) {
-                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x * y))],
-                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
+                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let mut it = body.iter();
+                    let first = it.next().unwrap();
+                    let second= it.next().unwrap();
+                    match (first, second) {
+                        (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x * y))],
+                        _ => fail!("+ can not be applied to {} and {}", first, second),
                     }
-                };
-                func
+                };                func
             },
         });
         symbols.insert(Symbol {
             name: "/",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    match (body[0], body[1]) {
-                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x / y))],
-                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
+                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let mut it = body.iter();
+                    let first = it.next().unwrap();
+                    let second= it.next().unwrap();
+                    println!("{} / {}", first, second)
+                    match (first, second) {
+                        (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x / y))],
+                        _ => fail!("+ can not be applied to {} and {}", first, second),
                     }
                 };
                 func
@@ -124,10 +133,13 @@ impl<'a> SymbolTable<'a> {
             name: "-",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    match (body[0], body[1]) {
-                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x - y))],
-                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
+                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let mut it = body.iter();
+                    let first = it.next().unwrap();
+                    let second= it.next().unwrap();
+                    match (first, second) {
+                        (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x - y))],
+                        _ => fail!("+ can not be applied to {} and {}", first, second),
                     }
                 };
                 func
@@ -137,10 +149,11 @@ impl<'a> SymbolTable<'a> {
             name: "switch",
             arity: 2,
             function: {
-                fn func<'a>(name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    match (body[0], body[1]) {
-                        (x, y) => vec![x, y],
-                    }
+                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let mut it = body.into_iter();
+                    let first = it.next().unwrap();
+                    let second= it.next().unwrap();
+                    vec![first, second]
                 };
                 func
             },
@@ -165,8 +178,8 @@ impl<'a> SymbolTable<'a> {
                 _ => fail!("token \"{}\" is not a definition!", token),
             },
             function: { //NEED MOAR UNBOXED CLOSURES to get rid of the symbols arg.
-                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    let mut local_stack: Vec<Token<'a>> = vec![];
+                fn func<'a>(_name: &'a str, _arity: uint, _body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let local_stack: Vec<Token<'a>> = vec![];
                     local_stack
                 };
                 func
@@ -230,20 +243,22 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                     if !symbol_table.contains_name(name) {
                         fail!("undefined symbol: \"{}\". aborting!", name)
                     }
-                    // let mut args: Vec<Token<'a>> = vec![];
-                    // let symbol = symbol_table.get(name);
-                    // for _ in range(0, symbol.arity) {
-                    //     args.push(match stack.pop() {
-                    //         Some(Item(x)) => {
-                    //             println!("X IS {}", x)
-                    //             // DOD SOMETHING
-                    //         },
-                    //         Some(_) => fail!("HOW DID WE GET HERE!"),
-                    //         None => fail!("failure to pop from stack!"),
-                    //     });
-                    // }
-                    // let result = (symbol.function)(name, symbol.arity, args, symbol_table);
-                    // stack.extend(result.into_iter());
+                    let mut args: Vec<Token<'a>> = vec![];
+                    let symbol = symbol_table.get(name);
+                    for _ in range(0, symbol.arity) {
+                        args.push(match stack.pop() {
+                            Some(Item(PapyName(name))) => {
+                                Item(PapyName(name))
+                            }
+                            Some(Item(x)) => {
+                                Item(x)
+                            },
+                            Some(_) => fail!("HOW DID WE GET HERE!"),
+                            None => fail!("failure to pop from stack!"),
+                        });
+                    }
+                    let result = (symbol.function)(symbol.name, symbol.arity, args, symbol_table);
+                    stack.extend(result.into_iter());
                 }
             }
         }
