@@ -1,6 +1,6 @@
 # The Papy Programming Language #
 
-[![Build Status](https://api.travis-ci.org/sinistersnare/papy.svg)](https://api.travis-ci.org/sinistersnare/papy.svg)
+[![Build Status](https://api.travis-ci.org/sinistersnare/papy.svg)](https://travis-ci.org/sinistersnare/papy)
 
 ## What is Papy ##
 
