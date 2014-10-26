@@ -4,7 +4,7 @@ version = "0.1.0"
 dependencies = [
  "scan 0.5.1 (git+https://github.com/DanielKeep/rust-scan.git#8adc8e4574db2264462b2b8b4b6d74cb4b96b100)",
  "scan_util 0.5.0 (git+https://github.com/DanielKeep/rust-scan-util.git#72f4419b85ab8b73e8d50f14dbf2447367e57ba7)",
- "spellck 0.2.0",
+ "spellck 0.2.0 (git+https://github.com/huonw/spellck#1b1623b1acab6f1c94932a66027770387fc289e2)",
 ]
 
 [[package]]
@@ -23,12 +23,5 @@ source = "git+https://github.com/DanielKeep/rust-scan-util.git#72f4419b85ab8b73e
 [[package]]
 name = "spellck"
 version = "0.2.0"
-dependencies = [
- "stem 0.1.0 (git+https://github.com/mrordinaire/rust-stem#7cc5de74349f3df21eb68485b07038972a339e81)",
-]
-
-[[package]]
-name = "stem"
-version = "0.1.0"
-source = "git+https://github.com/mrordinaire/rust-stem#7cc5de74349f3df21eb68485b07038972a339e81"
+source = "git+https://github.com/huonw/spellck#1b1623b1acab6f1c94932a66027770387fc289e2"
 

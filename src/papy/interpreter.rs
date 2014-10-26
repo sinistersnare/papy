@@ -85,13 +85,12 @@ impl<'a> SymbolTable<'a> {
             arity: 2,
             function: { //need moar unboxed closures
                 fn func<'a>(_name: &'a str, _arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
-                    let one = body[0];
-                    let two = body[1];
                     match (body[0], body[1]) {
                         (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x + y))],
                         _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
                     }
                 };
+
                 func
             },
         });
