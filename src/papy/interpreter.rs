@@ -24,7 +24,7 @@ pub enum LangItem<'a> {
 struct Symbol<'a> {
     name: &'a str,
     arity: uint,
-    function: fn(name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
+    function: fn(name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
 }
 
 pub struct SymbolTable<'a> {
@@ -84,7 +84,7 @@ impl<'a> SymbolTable<'a> {
             name: "+",
             arity: 2,
             function: { //need moar unboxed closures
-                fn func<'a>(_name: &'a str, _arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(_name: &'a str, _arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     match (body[0], body[1]) {
                         (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x + y))],
                         _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
@@ -98,7 +98,7 @@ impl<'a> SymbolTable<'a> {
             name: "*",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     match (body[0], body[1]) {
                         (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x * y))],
                         _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
@@ -111,7 +111,7 @@ impl<'a> SymbolTable<'a> {
             name: "/",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     match (body[0], body[1]) {
                         (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x / y))],
                         _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
@@ -124,7 +124,7 @@ impl<'a> SymbolTable<'a> {
             name: "-",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     match (body[0], body[1]) {
                         (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x - y))],
                         _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
@@ -137,10 +137,9 @@ impl<'a> SymbolTable<'a> {
             name: "switch",
             arity: 2,
             function: {
-                fn func<'a>(name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     match (body[0], body[1]) {
-                        (Item(x), Item(y)) => vec![Item(x), Item(y)],
-                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
+                        (x, y) => vec![x, y],
                     }
                 };
                 func
@@ -166,7 +165,7 @@ impl<'a> SymbolTable<'a> {
                 _ => fail!("token \"{}\" is not a definition!", token),
             },
             function: { //NEED MOAR UNBOXED CLOSURES to get rid of the symbols arg.
-                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(_name: &'a str, arity: uint, body: Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     let mut local_stack: Vec<Token<'a>> = vec![];
                     local_stack
                 };

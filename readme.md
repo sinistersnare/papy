@@ -1,5 +1,7 @@
 # The Papy Programming Language #
 
+[![Build Status](https://api.travis-ci.org/sinistersnare/papy.svg)](https://api.travis-ci.org/sinistersnare/papy.svg)
+
 ## What is Papy ##
 
 Papy is a stack based programming language. you put items on the stack, and then operate on them with functions.
