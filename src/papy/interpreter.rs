@@ -21,15 +21,10 @@ pub enum LangItem<'a> {
     PapyName(&'a str),
 }
 
-pub struct Argument<'a> {
-    name: &'a str,
-    value: LangItem<'a>,
-}
-
 struct Symbol<'a> {
     name: &'a str,
     arity: uint,
-    function: fn(name: &'a str, args: &Vec<Argument<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
+    function: fn(name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>>,
 }
 
 pub struct SymbolTable<'a> {
@@ -89,13 +84,12 @@ impl<'a> SymbolTable<'a> {
             name: "+",
             arity: 2,
             function: { //need moar unboxed closures
-                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
-                    match (args[0], args[1]) {
-                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
-                            vec![Item(PapyNumber(x + y))]
-                        },
-                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
-                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                fn func<'a>(_name: &'a str, _arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    let one = body[0];
+                    let two = body[1];
+                    match (body[0], body[1]) {
+                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x + y))],
+                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
                     }
                 };
                 func
@@ -105,13 +99,10 @@ impl<'a> SymbolTable<'a> {
             name: "*",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
-                    match (args[0], args[1]) {
-                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
-                            vec![Item(PapyNumber(x * y))]
-                        },
-                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
-                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    match (body[0], body[1]) {
+                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x * y))],
+                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
                     }
                 };
                 func
@@ -121,13 +112,10 @@ impl<'a> SymbolTable<'a> {
             name: "/",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
-                    match (args[0], args[1]) {
-                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
-                            vec![Item(PapyNumber(x / y))]
-                        },
-                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
-                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    match (body[0], body[1]) {
+                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x / y))],
+                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
                     }
                 };
                 func
@@ -137,13 +125,10 @@ impl<'a> SymbolTable<'a> {
             name: "-",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
-                    match (args[0], args[1]) {
-                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
-                            vec![Item(PapyNumber(x - y))]
-                        },
-                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
-                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    match (body[0], body[1]) {
+                        (Item(PapyNumber(x)), Item(PapyNumber(y))) => vec![Item(PapyNumber(x - y))],
+                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
                     }
                 };
                 func
@@ -153,13 +138,10 @@ impl<'a> SymbolTable<'a> {
             name: "switch",
             arity: 2,
             function: {
-                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, _symbols: &SymbolTable) -> Vec<Token<'a>> {
-                    match (args[0], args[1]) {
-                        (Argument {name: _, value: PapyNumber(x)}, Argument {name: _,value: PapyNumber(y)}) => {
-                            vec![Item(PapyNumber(x)), Item(PapyNumber(y))]
-                        },
-                        (Argument {name: _, value: PapyString(_) }, Argument {name: _, value: PapyString(_)}) => fail!("cant add strings! They also dont exist yet!"),
-                        (_, _) => fail!("types need to be the same! Not PapyNumber + PapyNumber, or PapyString + PapyString!"),
+                fn func<'a>(name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                    match (body[0], body[1]) {
+                        (Item(x), Item(y)) => vec![Item(x), Item(y)],
+                        _ => fail!("+ can not be applied to {} and {}", body[0], body[1]),
                     }
                 };
                 func
@@ -185,32 +167,8 @@ impl<'a> SymbolTable<'a> {
                 _ => fail!("token \"{}\" is not a definition!", token),
             },
             function: { //NEED MOAR UNBOXED CLOSURES to get rid of the symbols arg.
-                fn func<'a>(_name: &'a str, args: &Vec<Argument<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
+                fn func<'a>(_name: &'a str, arity: uint, body: &Vec<Token<'a>>, symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
                     let mut local_stack: Vec<Token<'a>> = vec![];
-                    for arg in args.iter() {
-                        match *arg {
-                            Argument {name: _, value: PapyNumber(num)} => local_stack.push(Item(PapyNumber(num))),
-                            Argument {name: _, value: PapyString(string)}=> local_stack.push(Item(PapyString(string))) ,
-                            Argument {name: arg_name, value: PapyName(name)} => {
-                                let sym = symbols.get(name);
-                                let mut local_args = vec![];
-                                for _i in range(0, sym.arity) {
-                                    local_args.push(match local_stack.pop() {
-                                        Some(Item(val)) => {
-                                            Argument {
-                                                name: arg_name,
-                                                value: val
-                                            }
-                                        },
-                                        Some(_) => fail!("HOW DID WE GET HERE"),
-                                        None => fail!("couldnt pop from local stack! not enough args")
-
-                                    });
-                                }
-                                (sym.function)(sym.name, &local_args, symbols);
-                            },
-                        }
-                    }
                     local_stack
                 };
                 func
@@ -274,23 +232,20 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                     if !symbol_table.contains_name(name) {
                         fail!("undefined symbol: \"{}\". aborting!", name)
                     }
-                    let mut args = vec![];
-                    let symbol = symbol_table.get(name);
-                    for _ in range(0, symbol.arity) {
-                        args.push(match stack.pop() {
-                            Some(Item(x)) => {
-                                println!("X IS {}", x)
-                                Argument {
-                                    name: "",
-                                    value: x,
-                                }
-                            },
-                            Some(_) => fail!("HOW DID WE GET HERE!"),
-                            None => fail!("failure to pop from stack!"),
-                        });
-                    }
-                    let result = (symbol.function)(name, &args, symbol_table);
-                    stack.extend(result.into_iter());
+                    // let mut args: Vec<Token<'a>> = vec![];
+                    // let symbol = symbol_table.get(name);
+                    // for _ in range(0, symbol.arity) {
+                    //     args.push(match stack.pop() {
+                    //         Some(Item(x)) => {
+                    //             println!("X IS {}", x)
+                    //             // DOD SOMETHING
+                    //         },
+                    //         Some(_) => fail!("HOW DID WE GET HERE!"),
+                    //         None => fail!("failure to pop from stack!"),
+                    //     });
+                    // }
+                    // let result = (symbol.function)(name, symbol.arity, args, symbol_table);
+                    // stack.extend(result.into_iter());
                 }
             }
         }
