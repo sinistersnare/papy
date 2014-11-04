@@ -14,8 +14,8 @@ name = "papy"
 path = "src/bin/papy.rs"
 
 [dependencies.spellck]
-# git = "https://github.com/huonw/spellck"
-path = "../spellck"
+git = "https://github.com/huonw/spellck"
+# path = "../spellck"
 
 [dependencies.scan]
 
