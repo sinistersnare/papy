@@ -1,5 +1,7 @@
 env:
     SPELLCK_LINT_DICT=/usr/share/dict/words
+notifications:
+    email: false
 install:
   - curl https://static.rust-lang.org/rustup.sh | sudo sh -
 script:

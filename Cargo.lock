@@ -2,26 +2,33 @@
 name = "papy"
 version = "0.1.0"
 dependencies = [
- "scan 0.5.1 (git+https://github.com/DanielKeep/rust-scan.git#8adc8e4574db2264462b2b8b4b6d74cb4b96b100)",
- "scan_util 0.5.0 (git+https://github.com/DanielKeep/rust-scan-util.git#72f4419b85ab8b73e8d50f14dbf2447367e57ba7)",
- "spellck 0.2.0 (git+https://github.com/huonw/spellck#1b1623b1acab6f1c94932a66027770387fc289e2)",
+ "scan 0.5.2 (git+https://github.com/DanielKeep/rust-scan.git)",
+ "scan_util 0.5.0 (git+https://github.com/DanielKeep/rust-scan-util.git)",
+ "spellck 0.2.0",
 ]
 
 [[package]]
 name = "scan"
-version = "0.5.1"
-source = "git+https://github.com/DanielKeep/rust-scan.git#8adc8e4574db2264462b2b8b4b6d74cb4b96b100"
+version = "0.5.2"
+source = "git+https://github.com/DanielKeep/rust-scan.git#fd7994263f49b2f635b7fd72144936c2166200be"
 dependencies = [
- "scan_util 0.5.0 (git+https://github.com/DanielKeep/rust-scan-util.git#72f4419b85ab8b73e8d50f14dbf2447367e57ba7)",
+ "scan_util 0.5.0 (git+https://github.com/DanielKeep/rust-scan-util.git)",
 ]
 
 [[package]]
 name = "scan_util"
 version = "0.5.0"
-source = "git+https://github.com/DanielKeep/rust-scan-util.git#72f4419b85ab8b73e8d50f14dbf2447367e57ba7"
+source = "git+https://github.com/DanielKeep/rust-scan-util.git#af32461809b09d711954de3766515e49c14af542"
 
 [[package]]
 name = "spellck"
 version = "0.2.0"
-source = "git+https://github.com/huonw/spellck#1b1623b1acab6f1c94932a66027770387fc289e2"
+dependencies = [
+ "stem 0.1.0 (git+https://github.com/mrordinaire/rust-stem)",
+]
+
+[[package]]
+name = "stem"
+version = "0.1.0"
+source = "git+https://github.com/mrordinaire/rust-stem#0cc2bbf456f7b5509ec9b4a71af02fc524274d13"
 

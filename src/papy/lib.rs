@@ -8,7 +8,5 @@ extern crate scan_util;
 
 pub use program::{add_item, PapyState};
 
-// pub use interpreter;
-
 mod program;
 mod interpreter;

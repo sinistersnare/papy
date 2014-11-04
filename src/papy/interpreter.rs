@@ -90,7 +90,7 @@ impl<'a> SymbolTable<'a> {
                     let second= it.next().unwrap();
                     match (first, second) {
                         (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x + y))],
-                        _ => fail!("+ can not be applied to {} and {}", first, second),
+                        _ => panic!("+ can not be applied to {} and {}", first, second),
                     }
                 };
 
@@ -107,7 +107,7 @@ impl<'a> SymbolTable<'a> {
                     let second= it.next().unwrap();
                     match (first, second) {
                         (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x * y))],
-                        _ => fail!("+ can not be applied to {} and {}", first, second),
+                        _ => panic!("+ can not be applied to {} and {}", first, second),
                     }
                 };                func
             },
@@ -123,7 +123,7 @@ impl<'a> SymbolTable<'a> {
                     println!("{} / {}", first, second)
                     match (first, second) {
                         (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x / y))],
-                        _ => fail!("+ can not be applied to {} and {}", first, second),
+                        _ => panic!("+ can not be applied to {} and {}", first, second),
                     }
                 };
                 func
@@ -139,7 +139,7 @@ impl<'a> SymbolTable<'a> {
                     let second= it.next().unwrap();
                     match (first, second) {
                         (&Item(PapyNumber(x)), &Item(PapyNumber(y))) => vec![Item(PapyNumber(x - y))],
-                        _ => fail!("+ can not be applied to {} and {}", first, second),
+                        _ => panic!("+ can not be applied to {} and {}", first, second),
                     }
                 };
                 func
@@ -171,11 +171,11 @@ impl<'a> SymbolTable<'a> {
             //FIXME ugh
             name: match *token {
                 Definition(name, _, _) => name,
-                _ => fail!("token \"{}\" is not a definition!", token),
+                _ => panic!("token \"{}\" is not a definition!", token),
             },
             arity: match *token {
                 Definition(_, arity, _) => arity,
-                _ => fail!("token \"{}\" is not a definition!", token),
+                _ => panic!("token \"{}\" is not a definition!", token),
             },
             function: { //NEED MOAR UNBOXED CLOSURES to get rid of the symbols arg.
                 fn func<'a>(_name: &'a str, _arity: uint, _body: Vec<Token<'a>>, _symbols: &SymbolTable<'a>) -> Vec<Token<'a>> {
@@ -193,7 +193,7 @@ impl<'a> SymbolTable<'a> {
     fn get(&self, name: &'a str) -> Symbol<'a> { //TODO use Option instead of failure.
         match self.symbols.iter().filter(|symbol| symbol.name == name).last() {
             Some(val) => *val,
-            None => fail!("symbol with name \"{}\" does not exist!", name)
+            None => panic!("symbol with name \"{}\" does not exist!", name)
         }
     }
 }
@@ -227,7 +227,7 @@ pub fn scan_str<'a, S: Str>(text: S) -> Token<'a> {
 
     } {
         Ok(tok) => tok,
-        Err(reason) => fail!("could not parse input string: {}", reason)
+        Err(reason) => panic!("could not parse input string: {}", reason)
     }
 }
 
@@ -241,7 +241,7 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                 PapyString(string) => {stack.push(Item(PapyString(string)))},
                 PapyName(name) => {
                     if !symbol_table.contains_name(name) {
-                        fail!("undefined symbol: \"{}\". aborting!", name)
+                        panic!("undefined symbol: \"{}\". aborting!", name)
                     }
                     let mut args: Vec<Token<'a>> = vec![];
                     let symbol = symbol_table.get(name);
@@ -253,8 +253,8 @@ pub fn run_stack<'a>(tokens: Vec<Token<'a>>, symbol_table: &SymbolTable<'a>) -> 
                             Some(Item(x)) => {
                                 Item(x)
                             },
-                            Some(_) => fail!("HOW DID WE GET HERE!"),
-                            None => fail!("failure to pop from stack!"),
+                            Some(_) => panic!("HOW DID WE GET HERE!"),
+                            None => panic!("failure to pop from stack!"),
                         });
                     }
                     let result = (symbol.function)(symbol.name, symbol.arity, args, symbol_table);
