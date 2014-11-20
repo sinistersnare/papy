@@ -1,4 +1,6 @@
-use interpreter::{SymbolTable, scan_str, Token, run_stack, Definition, Item, Comment};
+
+use interpreter::{SymbolTable, scan_str, Token, run_stack};
+use interpreter::Token::{Definition, Item, Comment};
 
 #[deriving(Show)]
 pub struct PapyState<'a> {

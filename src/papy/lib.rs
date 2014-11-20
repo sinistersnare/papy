@@ -1,4 +1,6 @@
-#![feature(phase, if_let, default_type_params, struct_variant, slicing_syntax)]
+#![feature(phase, if_let, default_type_params, slicing_syntax)]
+
+#![spellck_extra_words="papy"]
 
 #[phase(plugin)] extern crate regex_macros;
 extern crate regex;

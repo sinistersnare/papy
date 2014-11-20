@@ -1,7 +1,8 @@
 use std::collections::HashSet;
 use std::hash::{Hash, Writer};
 use std::fmt;
-
+use self::Token::{Definition, Item, Comment};
+use self::PapyItem::{PapyNumber, PapyString, PapyName};
 #[deriving(Show, PartialEq, Clone)]
 pub enum Token<'a> {
     Definition {
@@ -13,7 +14,6 @@ pub enum Token<'a> {
     Comment,
     // Comment(&'a str),
 }
-
 #[deriving(PartialEq, Show, Clone)]
 pub enum PapyItem<'a> {
     PapyNumber(i32),
